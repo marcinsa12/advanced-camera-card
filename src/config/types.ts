@@ -860,6 +860,7 @@ const mediaLayoutConfigSchema = z.object({
       top: z.number().min(0).max(100).optional().default(0),
     })
     .optional(),
+  rotation: z.number().min(0).max(360).optional(),
   pan: panSchema.optional(),
   zoom: zoomSchema.optional(),
 });

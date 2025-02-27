@@ -41,4 +41,14 @@ export const updateElementStyleFromMediaLayoutConfig = (
       );
     }
   }
+  
+  // Apply rotation if defined
+  if (mediaLayoutConfig?.rotation !== undefined) {
+    element.style.setProperty(
+      '--advanced-camera-card-media-layout-rotation',
+      `${mediaLayoutConfig.rotation}deg`
+    );
+  } else {
+    element.style.removeProperty('--advanced-camera-card-media-layout-rotation');
+  }
 };

@@ -11,4 +11,12 @@
       var(--advanced-camera-card-media-layout-view-box-bottom, 0%)
       var(--advanced-camera-card-media-layout-view-box-left, 0%)
   );
+  
+  // Apply rotation if defined
+  transform: rotate(var(--advanced-camera-card-media-layout-rotation, 0deg));
+  transform-origin: center center;
+  
+  // Ensure the container adjusts to maintain proper dimensions when rotated
+  max-width: 100%;
+  max-height: 100%;
 }

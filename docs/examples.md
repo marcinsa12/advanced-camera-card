@@ -1293,3 +1293,32 @@ automations:
 ```
 
 ![Zoom automation example](images/zoom-automation.gif 'Zoom automation example :size=400')
+
+## Camera Rotation
+
+If you have a camera that's mounted sideways or upside down, you can use the rotation option to correct the orientation in the card display.
+
+```yaml
+cameras:
+  - camera_entity: camera.sideways_camera
+    dimensions:
+      layout:
+        rotation: 90  # Rotate 90 degrees clockwise
+        
+  - camera_entity: camera.upside_down_camera
+    dimensions:
+      layout:
+        rotation: 180  # Rotate 180 degrees (upside down)
+```
+
+For cameras mounted at odd angles, you can specify any rotation value between 0 and 360 degrees:
+
+```yaml
+cameras:
+  - camera_entity: camera.angled_camera
+    dimensions:
+      layout:
+        rotation: 45  # Rotate 45 degrees clockwise
+```
+
+When using 90 or 270 degree rotations, the container will automatically adjust to maintain the proper aspect ratio.

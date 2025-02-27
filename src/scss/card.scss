@@ -236,3 +236,22 @@ ha-card:hover
   > advanced-camera-card-status-bar[data-style='hover-card'] {
   opacity: 1;
 }
+
+.rotated-media-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  
+  &[data-rotation="90"], &[data-rotation="270"] {
+    // For 90 and 270 degree rotations, we need to adjust the container
+    // to maintain the proper aspect ratio
+    img, video, canvas, ha-camera-stream, ha-hls-player {
+      max-width: none;
+      max-height: none;
+    }
+  }
+}

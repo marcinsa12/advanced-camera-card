@@ -53,6 +53,7 @@ import { ViewMediaClassifier } from '../../view/media-classifier.js';
 import { MediaQueriesClassifier } from '../../view/media-queries-classifier.js';
 import { VideoContentType, ViewMedia } from '../../view/media.js';
 import { renderProgressIndicator } from '../progress-indicator.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 
 @customElement('advanced-camera-card-viewer-provider')
 export class AdvancedCameraCardViewerProvider
@@ -353,74 +354,80 @@ export class AdvancedCameraCardViewerProvider
       });
     }
 
+    // Get rotation value from media layout config if available
+    const rotation = this.viewerConfig?.dimensions?.layout?.rotation || 0;
+    const rotationAttribute = rotation ? rotation.toString() : null;
+
     // Note: crossorigin="anonymous" is required on <video> below in order to
     // allow screenshot of motionEye videos which currently go cross-origin.
     return this._useZoomIfRequired(html`
-      ${ViewMediaClassifier.isVideo(this.media)
-        ? this.media.getVideoContentType() === VideoContentType.HLS
-          ? html`<advanced-camera-card-ha-hls-player
-              ${ref(this._refAdvancedCameraCardMediaPlayer)}
-              allow-exoplayer
-              aria-label="${this.media.getTitle() ?? ''}"
-              ?autoplay=${false}
-              controls
-              muted
-              playsinline
-              title="${this.media.getTitle() ?? ''}"
-              url=${this._url}
-              .hass=${this.hass}
-              ?controls=${this.viewerConfig.controls.builtin}
-            >
-            </advanced-camera-card-ha-hls-player>`
-          : html`
-              <video
-                ${ref(this._refVideoProvider)}
+      <div class="rotated-media-container" data-rotation=${ifDefined(rotationAttribute)}>
+        ${ViewMediaClassifier.isVideo(this.media)
+          ? this.media.getVideoContentType() === VideoContentType.HLS
+            ? html`<advanced-camera-card-ha-hls-player
+                ${ref(this._refAdvancedCameraCardMediaPlayer)}
+                allow-exoplayer
                 aria-label="${this.media.getTitle() ?? ''}"
-                title="${this.media.getTitle() ?? ''}"
+                ?autoplay=${false}
+                controls
                 muted
                 playsinline
-                crossorigin="anonymous"
-                ?autoplay=${false}
+                title="${this.media.getTitle() ?? ''}"
+                url=${this._url}
+                .hass=${this.hass}
                 ?controls=${this.viewerConfig.controls.builtin}
-                @loadedmetadata=${(ev: Event) => {
-                  if (ev.target && !!this.viewerConfig?.controls.builtin) {
-                    hideMediaControlsTemporarily(
-                      ev.target as HTMLVideoElement,
-                      MEDIA_LOAD_CONTROLS_HIDE_SECONDS,
-                    );
-                  }
-                }}
-                @loadeddata=${(ev: Event) => {
-                  dispatchMediaLoadedEvent(this, ev, {
-                    player: this,
-                    capabilities: {
-                      supportsPause: true,
-                      hasAudio: mayHaveAudio(ev.target as HTMLVideoElement),
-                    },
-                    technology: ['hls'],
-                  });
-                }}
-                @volumechange=${() => dispatchMediaVolumeChangeEvent(this)}
-                @play=${() => dispatchMediaPlayEvent(this)}
-                @pause=${() => dispatchMediaPauseEvent(this)}
               >
-                <source src=${this._url} type="video/mp4" />
-              </video>
-            `
-        : html`<img
-            ${ref(this._refImageProvider)}
-            aria-label="${this.media.getTitle() ?? ''}"
-            src="${this._url}"
-            title="${this.media.getTitle() ?? ''}"
-            @click=${() => {
-              if (this.viewerConfig?.snapshot_click_plays_clip) {
-                this._switchToRelatedClipView();
-              }
-            }}
-            @load=${(ev: Event) => {
-              dispatchMediaLoadedEvent(this, ev, { player: this, technology: ['jpg'] });
-            }}
-          />`}
+              </advanced-camera-card-ha-hls-player>`
+            : html`
+                <video
+                  ${ref(this._refVideoProvider)}
+                  aria-label="${this.media.getTitle() ?? ''}"
+                  title="${this.media.getTitle() ?? ''}"
+                  muted
+                  playsinline
+                  crossorigin="anonymous"
+                  ?autoplay=${false}
+                  ?controls=${this.viewerConfig.controls.builtin}
+                  @loadedmetadata=${(ev: Event) => {
+                    if (ev.target && !!this.viewerConfig?.controls.builtin) {
+                      hideMediaControlsTemporarily(
+                        ev.target as HTMLVideoElement,
+                        MEDIA_LOAD_CONTROLS_HIDE_SECONDS,
+                      );
+                    }
+                  }}
+                  @loadeddata=${(ev: Event) => {
+                    dispatchMediaLoadedEvent(this, ev, {
+                      player: this,
+                      capabilities: {
+                        supportsPause: true,
+                        hasAudio: mayHaveAudio(ev.target as HTMLVideoElement),
+                      },
+                      technology: ['hls'],
+                    });
+                  }}
+                  @volumechange=${() => dispatchMediaVolumeChangeEvent(this)}
+                  @play=${() => dispatchMediaPlayEvent(this)}
+                  @pause=${() => dispatchMediaPauseEvent(this)}
+                >
+                  <source src=${this._url} type="video/mp4" />
+                </video>
+              `
+          : html`<img
+              ${ref(this._refImageProvider)}
+              aria-label="${this.media.getTitle() ?? ''}"
+              src="${this._url}"
+              title="${this.media.getTitle() ?? ''}"
+              @click=${() => {
+                if (this.viewerConfig?.snapshot_click_plays_clip) {
+                  this._switchToRelatedClipView();
+                }
+              }}
+              @load=${(ev: Event) => {
+                dispatchMediaLoadedEvent(this, ev, { player: this, technology: ['jpg'] });
+              }}
+            />`}
+      </div>
     `);
   }
 
